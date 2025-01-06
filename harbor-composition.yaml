@@ -1,0 +1,116 @@
+apiVersion: apiextensions.crossplane.io/v1
+kind: Composition
+metadata:
+  name: this-is-a-serious-composition-mind-you
+spec:
+  compositeTypeRef:
+    apiVersion: what-is-it-that-you-truly-desire.org/v1alpha1
+    kind: xSeriousHarbor
+  resources:
+    - name: certificate
+      base:
+        apiVersion: kubernetes.crossplane.io/v1alpha1
+        kind: Object
+        metadata:
+          namespace: harbor
+        spec:
+          forProvider:
+            manifest:
+              apiVersion: cert-manager.io/v1
+              kind: Certificate
+              metadata:
+                name: ""
+                namespace: harbor
+              spec:
+                secretName: ""
+                issuerRef:
+                  name: cert-manager-webhook-duckdns-production
+                  kind: ClusterIssuer
+                commonName: ""
+                dnsNames: []
+          providerConfigRef:
+            name: default
+      patches:
+        - fromFieldPath: spec.certificateName
+          toFieldPath: spec.forProvider.manifest.metadata.name
+        - fromFieldPath: spec.certificateName
+          toFieldPath: spec.forProvider.manifest.spec.secretName
+        - fromFieldPath: spec.hostname
+          toFieldPath: spec.forProvider.manifest.spec.commonName
+        - fromFieldPath: spec.hostname
+          toFieldPath: spec.forProvider.manifest.spec.dnsNames[0]
+    - name: harbor
+      base:
+        apiVersion: helm.crossplane.io/v1beta1
+        kind: Release
+        spec:
+          forProvider:
+            chart:
+              name: harbor
+              repository: https://helm.goharbor.io
+              version: 1.16.0
+            namespace: harbor
+            values:
+              expose:
+                type: ingress
+                tls:
+                  enabled: true
+                  certSource: secret
+                  secret:
+                    secretName: ""
+                ingress:
+                  hosts:
+                    core: ""
+                  className: nginx
+                  annotations:
+                    ingress.kubernetes.io/ssl-redirect: "true"
+                    ingress.kubernetes.io/proxy-body-size: "0"
+                    cert-manager.io/cluster-issuer: "cert-manager-webhook-duckdns-production"
+                    nginx.ingress.kubernetes.io/proxy-body-size: "0"
+                    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+              harborAdminPassword: ""
+              externalURL: ""
+              persistence:
+                enabled: true
+                persistentVolumeClaim:
+                  registry:
+                    size: 5Gi
+                  chartmuseum:
+                    size: 1Gi
+                  jobservice:
+                    size: 1Gi
+                  database:
+                    size: 2Gi
+                  redis:
+                    size: 1Gi
+              database:
+                password: "password"
+              redis:
+                password: "password"
+              notary:
+                enabled: true
+                server:
+                  secretName: notary-secret
+                signer:
+                  secretName: notary-secret
+              registry:
+                podAnnotations:
+                  linkerd.io/inject: "enabled"
+                  config.linkerd.io/skip-outbound-ports: "8080,5000"
+                  config.linkerd.io/skip-inbound-ports: "8080,5000"
+          providerConfigRef:
+            name: helm-provider
+      patches:
+        - fromFieldPath: spec.certificateName
+          toFieldPath: spec.forProvider.values.expose.tls.secret.secretName
+        - fromFieldPath: spec.hostname
+          toFieldPath: spec.forProvider.values.expose.ingress.hosts.core
+        - fromFieldPath: spec.hostname
+          toFieldPath: spec.forProvider.values.externalURL
+          transforms:
+            - type: string
+              string:
+                fmt: "https://%s"
+        - fromFieldPath: spec.password
+          toFieldPath: spec.forProvider.values.harborAdminPassword
+

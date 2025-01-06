@@ -1,0 +1,48 @@
+apiVersion: apiextensions.crossplane.io/v1
+kind: CompositeResourceDefinition
+metadata:
+  name: xseriousharbors.what-is-it-that-you-truly-desire.org
+spec:
+  group: what-is-it-that-you-truly-desire.org
+  names:
+    kind: xSeriousHarbor
+    plural: xseriousharbors
+  claimNames:
+    kind: SeriousHarbor
+    plural: seriousharbors
+    singular: seriousharbor
+  versions:
+    - name: v1alpha1
+      served: true
+      referenceable: true
+      schema:
+        openAPIV3Schema:
+          type: object
+          properties:
+            spec:
+              type: object
+              properties:
+                certificateName:
+                  type: string
+                  description: Name of the TLS certificate and also the name of the secret where the certificate would be stored.
+                hostname:
+                  type: string
+                  description: The hostname for Harbor ingress and external URL.
+                password:
+                  type: string
+                  description: Admin password for Harbor.
+              required:
+                - certificateName
+                - hostname
+                - password
+      additionalPrinterColumns:
+        - name: CertificateName
+          type: string
+          jsonPath: .spec.certificateName
+        - name: Hostname
+          type: string
+          jsonPath: .spec.hostname
+        - name: Password
+          type: string
+          jsonPath: .spec.password
+

@@ -1,0 +1,5 @@
+apiVersion: multicluster.linkerd.io/v1alpha1
+kind: ServiceExport
+metadata:
+  name: serious-harbor-claim-wwdn7-cv69t-registry
+  namespace: harbor

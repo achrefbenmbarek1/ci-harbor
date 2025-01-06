@@ -1,0 +1,10 @@
+apiVersion: what-is-it-that-you-truly-desire.org/v1alpha1
+kind: SeriousHarbor
+metadata:
+  name: serious-harbor-claim
+  namespace: harbor
+spec:
+  certificateName: madou-scientistou.duckdns.org-tls
+  hostname: madou-scientistou.duckdns.org
+  password: harbor
+
