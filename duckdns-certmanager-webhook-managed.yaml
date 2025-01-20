@@ -10,8 +10,6 @@ spec:
       version: v1.2.3
     namespace: cert-manager
     values:
-      duckdns:
-        token: "79f4e377-2623-45f7-81e0-f8f4d07a466c"
       clusterIssuer:
         production:
           create: true
@@ -19,5 +17,13 @@ spec:
           create: true
         email: achrefbenmbarekopensource@gmail.com
       logLevel: 2
+    set:
+      - name: duckdns.token
+        valueFrom:
+          secretKeyRef:
+            name: duckdns-webhook-token
+            key: token
+            namespace: cert-manager
+
   providerConfigRef:
     name: helm-provider

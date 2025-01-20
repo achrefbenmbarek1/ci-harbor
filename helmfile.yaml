@@ -10,17 +10,3 @@ releases:
   createNamespace: true
   chart: crossplane-stable/crossplane
   version: 1.18.1
-
-- name: cert-manager-webhook-duckdns
-  namespace: cert-manager
-  chart: ../crossplane/cert-manager-webhook-duckdns/deploy/cert-manager-webhook-duckdns 
-  values:
-    - duckdns:
-        token: "79f4e377-2623-45f7-81e0-f8f4d07a466c"
-    - clusterIssuer:
-        production:
-          create: true
-        staging:
-          create: true
-        email: achrefbenmbarekopensource@gmail.com
-    - logLevel: 2
